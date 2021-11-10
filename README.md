@@ -45,7 +45,7 @@ The `build-sso.sh` uses a custom maven `settings.xml` which seems to be ignored 
 
 ## Versions
 
-The build-sso.sh script supports 7.4.5->7.4.7.
+The build-sso.sh script supports 7.4.5->7.4.9.
 
 ## Prerequisite and systems supported
 

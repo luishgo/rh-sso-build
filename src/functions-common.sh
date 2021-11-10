@@ -106,7 +106,7 @@ function download_and_unzip {
 function save_result {
     # Copy zip files to the base dir, excluding the src files
     cd $BUILD_HOME
-    find work/rh-sso-$SSO_SHORT_VERSION-src/keycloak-parent-$KEYCLOAK_PARENT_VERSION/distribution/server-dist/target \( ! -name "rh-sso*-src.zip" \) -a \( -name "rh-sso*.tar.gz" \) -exec cp -f {} dist/rh-sso-$SSO_VERSION.tar.gz \;
+    find $(_keycloak_dist_dir) \( ! -name "rh-sso*-src.zip" \) -a \( -name "rh-sso*.tar.gz" \) -exec cp -f {} dist/rh-sso-$SSO_VERSION.tar.gz \;
 
     if [ -f dist/rh-sso-$SSO_VERSION.tar.gz ]
     then
@@ -115,6 +115,14 @@ function save_result {
     else
         echo "Build failed. You may have a look at the work/build.log file, maybe you'll find the reason why it failed."
         exit 1
+    fi
+}
+
+function _keycloak_dist_dir {
+    if [ "$SSO_VERSION" = "7.4.9" ]; then
+        echo work/rh-sso-$SSO_VERSION.GA-src/org.keycloak-keycloak-parent-9.x/distribution/server-dist/target
+    else
+        echo work/rh-sso-$SSO_SHORT_VERSION-src/keycloak-parent-$KEYCLOAK_PARENT_VERSION/distribution/server-dist/target
     fi
 }
 

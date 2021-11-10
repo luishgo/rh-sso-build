@@ -25,18 +25,38 @@ function set_version {
 function prepare_sso_source {
     download_and_unzip http://ftp.redhat.com/redhat/jboss/sso/$SSO_VERSION/en/source/$SRC_FILE
 
-    KEYCLOAK_PARENT_VERSION=$(basename work/rh-sso-$SSO_SHORT_VERSION-src/keycloak-parent-*)
+    KEYCLOAK_PARENT_VERSION=$(basename _keycloak_parent_dir)
     KEYCLOAK_PARENT_VERSION=${KEYCLOAK_PARENT_VERSION:16}
     echo "ATTENTION: Be sure to build artifact wildfly-feature-pack from EAP version $(get_eap_version) before SSO. Check README.md for more information."
 
-    cd $BUILD_HOME/work/rh-sso-$SSO_SHORT_VERSION-src/keycloak-parent*
+    cd $(_keycloak_parent_dir)
     xml_clean sso
     MVN=mvn
     cd $BUILD_HOME
 }
 
+function _keycloak_parent_dir {
+    if [ "$SSO_VERSION" = "7.4.9" ]; then
+        echo work/rh-sso-$SSO_VERSION.GA-src/org.keycloak-keycloak-parent-*
+    else
+        echo work/rh-sso-$SSO_SHORT_VERSION-src/keycloak-parent-*
+    fi
+}
+
+function _keycloak_parent_pom {
+    if [ "$SSO_VERSION" = "7.4.9" ]; then
+        echo $BUILD_HOME/work/rh-sso-$SSO_VERSION.GA-src/org.keycloak-keycloak-parent-9.x/pom.xml
+    else
+        echo $BUILD_HOME/work/rh-sso-$SSO_SHORT_VERSION-src/keycloak-parent-$KEYCLOAK_PARENT_VERSION/pom.xml
+    fi
+}
+
+function get_eap_version {
+    grep "<eap.version>" "$(_keycloak_parent_pom)" | sed -e "s/<eap.version>\(.*\)<\/eap.version>/\1/" | sed 's/ //g'
+}
+
 function build_sso {
-    cd $BUILD_HOME/work/rh-sso-$SSO_SHORT_VERSION-src/keycloak-parent*
+    cd $(_keycloak_parent_dir)
     maven_build
     echo "Build done for SSO $SSO_VERSION"
 }
@@ -77,10 +97,6 @@ function maven_build {
     then
         cd ..
     fi
-}
-
-function get_eap_version {
-    grep "<eap.version>" $BUILD_HOME/work/rh-sso-$SSO_SHORT_VERSION-src/keycloak-parent-$KEYCLOAK_PARENT_VERSION/pom.xml | sed -e "s/<eap.version>\(.*\)<\/eap.version>/\1/" | sed 's/ //g'
 }
 
 function is_supported_version {
